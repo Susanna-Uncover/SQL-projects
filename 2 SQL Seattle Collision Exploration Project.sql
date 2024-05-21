@@ -1,7 +1,5 @@
 /*
-
 A Project for the Seattle Department of Transportation: Preparation for data visualisation 
-
 */
 
 -- Identifying the total number of collisions
@@ -15,7 +13,7 @@ ADD DATE_UPD Date;
 UPDATE PortfolioProject.dbo.SeattleCollision
 SET DATE_UPD = CONVERT(Date, DATE);
 
--- Converting the values from the 'time' column into readible time formats
+-- Converting the values from the 'time' column into readable time formats
 ALTER TABLE PortfolioProject.dbo.SeattleCollision
 ADD N_TIME TIME;
 
@@ -37,7 +35,7 @@ SET POORDRIVINGCOND = CASE
 		ELSE 1
 	END;
 
--- Creating a function for determining Daylight vs Nightime
+-- Creating a function for determining Daylight vs Nighttime
 CREATE FUNCTION FINDTIMEOFDAY(
     @CollisionDate DATE,
     @CollisionTime TIME)
@@ -57,11 +55,11 @@ BEGIN
     END;
 END;
 
--- Adding a new column 'TimeOfDay' to the  original dataframe
+-- Adding a new column 'TimeOfDay' to the  original data frame
 ALTER TABLE PortfolioProject.dbo.SeattleCollision
 ADD TIMEOFDAY AS dbo.FINDTIMEOFDAY(DATE_UPD, N_TIME);
 
--- Crating a filter for Nightime 
+-- Creating a filter for Nighttime 
 ALTER TABLE PortfolioProject.dbo.SeattleCollision
 ADD NIGHTTIME bit;
 UPDATE PortfolioProject.dbo.SeattleCollision
@@ -75,13 +73,13 @@ ALTER TABLE PortfolioProject.dbo.SeattleCollision
 ADD SEVERITY nvarchar(255);
 UPDATE PortfolioProject.dbo.SeattleCollision
 SET SEVERITY = CASE 
-		WHEN SEVERITYCODE = 3 THEN '3—fatality'
-		WHEN SEVERITYCODE = 2 THEN '2—injury'
-		WHEN SEVERITYCODE = 1 THEN '1—property damage'
-		ELSE '0—unknown'
+		WHEN SEVERITYCODE = 3 THEN '3â€”fatality'
+		WHEN SEVERITYCODE = 2 THEN '2â€”injury'
+		WHEN SEVERITYCODE = 1 THEN '1â€”property damage'
+		ELSE '0â€”unknown'
 	END;
 
--- Ordering the columns and omitting the columns that are less relevant
+-- Ordering the columns and omitting the less relevant columns
 SELECT DATE_UPD, TIME_UPD, TIMEOFDAY, SEVERITY, COLLISIONTYPE, JUNCTIONTYPE, INATTENTIONIND, UNDERINFL, SPEEDING, HITPARKEDCAR, POORDRIVINGCOND, NIGHTTIME, intersection_related
 FROM PortfolioProject.dbo.SeattleCollision
 ORDER BY DATE_UPD ASC
