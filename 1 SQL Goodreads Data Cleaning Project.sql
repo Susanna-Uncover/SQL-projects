@@ -5,12 +5,11 @@ Cleaning Goodreads data for a data-driven sci-fi book recommendation
 SELECT *
 FROM PortfolioProject.dbo.Goodreads
 
-
 -- Adding an ID column to improve table navigation
 ALTER TABLE PortfolioProject.dbo.Goodreads
 ADD id INT IDENTITY(1,1);
 
--- Duplicating the first row data before renaming the columns
+-- Duplicating the first row of data before renaming the columns
 INSERT INTO PortfolioProject.dbo.Goodreads
 VALUES (
 	4.4
@@ -38,7 +37,6 @@ EXEC sp_rename 'Goodreads.2958974', 'rating_count';
 EXEC sp_rename 'Goodreads.The Hunger Games (The Hunger Games, #1)', 'title';
 
 -- Examining the table for null values
-
 SELECT COUNT(*)-COUNT(rating) AS rating
 	 , COUNT(*)-COUNT(numberofreviews) AS n_of_reviews
 	 , COUNT(*)-COUNT(isbn) AS isbn
@@ -59,7 +57,6 @@ UPDATE PortfolioProject.dbo.Goodreads SET genres = NULL WHERE genres='None';
 DELETE FROM PortfolioProject.dbo.Goodreads WHERE media_type is null
 
 -- Identifying duplicate values
-
 SELECT isbn, COUNT(*)
 FROM PortfolioProject.dbo.Goodreads
 GROUP BY isbn
@@ -76,14 +73,14 @@ AND id <> (SELECT MIN(id)
            FROM PortfolioProject.dbo.Goodreads
            WHERE isbn = '0439023483');
 
--- Splitting out the authors column based on the author_url column
+-- Splitting out the author's column based on the author_url column
 ALTER TABLE PortfolioProject.dbo.Goodreads
 ADD author NVARCHAR(255);
 
 UPDATE PortfolioProject.dbo.Goodreads
 SET author = REPLACE(PARSENAME(REPLACE(author_url, ',', '.'), 1), '_', ' ');
 
--- Standartising the ratings column 
+-- Standardising the ratings column 
 ALTER TABLE PortfolioProject.dbo.Goodreads
 ADD rating_100 float;
 UPDATE PortfolioProject.dbo.Goodreads
@@ -102,7 +99,7 @@ CROSS APPLY STRING_SPLIT(Goodreads.genres, '|')
 GROUP BY value
 ORDER BY COUNT(*) DESC
 
--- Creating filter columns based on the genres hits
+-- Creating filter columns based on the genre hits
 ALTER TABLE PortfolioProject.dbo.Goodreads
 ADD genre_fantasy NVARCHAR(255),
     genre_romance NVARCHAR(255),
@@ -126,18 +123,16 @@ SET genre_fantasy = CASE WHEN genres LIKE '%fantasy%' THEN 'Yes' ELSE 'No' END,
     genre_adventure = CASE WHEN genres LIKE '%adventure%' THEN 'Yes' ELSE 'No' END;
 
 -- Delete unused columns
-
 ALTER TABLE PortfolioProject.dbo.Goodreads
 DROP COLUMN media_type, author_url, directory
 
--- Ordering the columns, filtering out low rating counts and missing isbn rows and non sci-fi books
+-- Ordering the columns, filtering out low rating counts and missing isbn rows and non-sci-fi books
 SELECT id, isbn, rating_100, rating_count, numberofreviews, title, author, publishing_year, genre_science_fiction
 FROM PortfolioProject.dbo.Goodreads
 WHERE genre_science_fiction ='Yes' AND rating_count > 30 AND isbn IS NOT NULL
 ORDER BY rating DESC
 
--- Looks like both of the Stormlight Archive entries are very well rated, let's add them to the reading list
-
+-- Looks like both of the Stormlight Archive entries are very well-rated, let's add them to the reading list
 SELECT id, isbn, rating_100, rating_count, numberofreviews, title, author, publishing_year
 FROM PortfolioProject.dbo.Goodreads
 WHERE author = 'Brandon Sanderson'
